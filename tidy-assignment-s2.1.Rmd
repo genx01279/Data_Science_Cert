@@ -1,0 +1,57 @@
+---
+title: "Wrangling-Session2.1-Assignment"
+author: "Lauren"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(tidyverse)
+library(dslabs)
+```
+
+Question 11: Examine the built-in dataset co2. This dataset comes with base R, not dslabs - just type co2 to access the dataset.
+Is co2 tidy? Why or why not?
+
+Question 12: Define the co2_wide object & tidy format.
+```{r}
+data(co2)
+str(co2)
+co2_wide <- data.frame(matrix(co2, ncol = 12, byrow = TRUE)) %>% 
+  setNames(1:12) %>%
+  mutate(year = as.character(1959:1997))
+str(co2_wide)
+co2_tidy <- co2_wide %>% pivot_longer(-year, names_to = "month", values_to = "co2")
+co2_tidy
+```
+
+Question 13: Use co2_tidy to plot CO2 versus month with a different curve for each year:
+```{r}
+co2_tidy %>% ggplot(aes(as.numeric(month), co2, color = year)) + geom_line()
+```
+
+Question 14: Load the admissions dataset from dslabs, which contains college admission information for men and women across six majors, and remove the applicants percentage column. 
+Which command could help you to wrangle the data into the desired format?
+```{r}
+library(dslabs)
+data(admissions)
+dat4 <- admissions %>% select(-applicants)
+dat4
+dat4_tidy <- pivot_wider(dat4, names_from = gender, values_from = admitted)
+dat4_tidy
+```
+
+Question 15: Now use the admissions dataset to create the object tmp, which has columns major, gender, key and value.Combine the key and gender and create a new column called column_name to get a variable with the following values: admitted_men, admitted_women, applicants_men, and applicants_women. Save the new data as tmp2.
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+tmp <- admissions %>%
+  pivot_longer(cols = c(admitted, applicants), names_to = "key", values_to = "value")
+tmp
+tmp2 <- tmp %>% unite(column_name, c(key, gender))
+tmp2
+```
